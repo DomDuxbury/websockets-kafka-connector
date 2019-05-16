@@ -1,12 +1,7 @@
 package connector;
 
+import com.google.gson.Gson;
 import connector.server.KafkaConnectorServer;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -16,14 +11,17 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
     private static final String KAFKA_SERVER = "localhost:9092";
 
     public static void main(String[] args) throws Exception {
+        ConcurrentHashMap<String, String> latestMessages = new ConcurrentHashMap<>();
+
         // Push messages from web sockets onto Kafka
         KafkaProducer producer = createProducer();
-        KafkaConnectorServer server = new KafkaConnectorServer(8887, producer);
+        KafkaConnectorServer server = new KafkaConnectorServer(8887, producer, latestMessages);
         Thread thread = new Thread(() -> server.start());
         thread.run();
 
@@ -36,6 +34,7 @@ public class Main {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
             for (ConsumerRecord<String, String> record : records) {
                 server.sendMessage(record.topic(), record.value());
+                latestMessages.put(record.topic(), record.value());
             }
         }
     }
@@ -58,6 +57,7 @@ public class Main {
         props.setProperty("bootstrap.servers", KAFKA_SERVER);
         props.setProperty("group.id", "test");
         props.setProperty("enable.auto.commit", "true");
+        props.setProperty("max.poll.records", "1");
         props.setProperty("auto.commit.interval.ms", "1000");
         props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
