@@ -1,6 +1,5 @@
 package connector;
 
-import com.google.gson.Gson;
 import connector.server.KafkaConnectorServer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
