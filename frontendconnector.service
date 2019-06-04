@@ -1,0 +1,12 @@
+[Unit]
+Description=Manage Frontend Kafka Connector service
+
+[Service]
+WorkingDirectory=/home/duckzbug/.java_services/workspace
+ExecStart=java -jar /home/duckzbug/.java_services/kafka-frontend-connector.jar
+User=duckzbug
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
