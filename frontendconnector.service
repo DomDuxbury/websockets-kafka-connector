@@ -2,9 +2,9 @@
 Description=Manage Frontend Kafka Connector service
 
 [Service]
-WorkingDirectory=/home/duckzbug/.java_services/workspace
-ExecStart=java -jar /home/duckzbug/.java_services/kafka-frontend-connector.jar
-User=duckzbug
+WorkingDirectory=/home/dom/.java_services/workspace
+ExecStart=/usr/lib/jvm/default-java/bin/java -jar /home/dom/.java_services/kafka-frontend-connector.jar
+User=dom
 Restart=on-failure
 RestartSec=10
 

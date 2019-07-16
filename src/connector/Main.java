@@ -24,13 +24,12 @@ public class Main {
         Thread thread = new Thread(() -> server.start());
         thread.run();
 
-
         // Take messages from topics and put them onto web sockets
         List<String> topics = Arrays.asList("TRACKS", "ROUTES");
-        KafkaConsumer consumer = createConsumer();
+        KafkaConsumer<String, String> consumer = createConsumer();
         consumer.subscribe(topics);
         while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10));
             for (ConsumerRecord<String, String> record : records) {
                 server.sendMessage(record.topic(), record.value());
                 latestMessages.put(record.topic(), record.value());
@@ -38,13 +37,14 @@ public class Main {
         }
     }
 
+
     private static KafkaProducer<String, String> createProducer() {
         Properties props = new Properties();
         props.put("bootstrap.servers", KAFKA_SERVER);
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("batch.size", 16384);
-        props.put("linger.ms", 1);
+        props.put("linger.ms", 0);
         props.put("buffer.memory", 33554432);
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
