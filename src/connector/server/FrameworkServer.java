@@ -5,16 +5,18 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 
 public abstract class FrameworkServer extends WebSocketServer {
+
+	private HashMap<Integer, WebSocket> connections;
 
     public FrameworkServer(InetSocketAddress address) {
         super(address);
     }
 
-    public void sendMessage(String type, Object payload) {
-        Message message = new Message(type, payload);
-        broadcast(message.serialize());
+    public void sendMessage(Message message) {
+        connections.get(message.getUserId()).send(message.serialize());
     }
 
 	@Override
@@ -22,11 +24,7 @@ public abstract class FrameworkServer extends WebSocketServer {
 		System.out.println( conn.getRemoteSocketAddress().getAddress().getHostAddress() + " entered the room!" );
 	}
 
-	@Override
-	public void onClose(WebSocket conn, int code, String reason, boolean remote ) {
-		broadcast( conn + " has left the room!" );
-		System.out.println( conn + " has left the room!" );
-	}
+
 
 	@Override
 	public void onError( WebSocket conn, Exception ex ) {
