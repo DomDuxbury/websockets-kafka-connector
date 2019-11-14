@@ -11,8 +11,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class KafkaConnectorServer extends FrameworkServer {
+
     private KafkaProducer<String, String> producer;
-    private Map<String, String> latestMessages;
+    private Integer latestID;
 
     @Override
     public void onMessage(WebSocket webSocket, String s) {
@@ -41,18 +42,26 @@ public class KafkaConnectorServer extends FrameworkServer {
         } else {
             sendMessage(websocket, "AUTHENTICATION_FAILURE", "");
         }
+        String messageToBackend = new Message(topic, webSocket.getAttachment(), payload).serialize();
+        ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, messageToBackend);
+        producer.send(record);
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        for (String topic: latestMessages.keySet()) {
-            sendMessage(topic, latestMessages.get(topic));
-        }
+        conn.setAttachment(latestID);
+        System.out.println("Connected User: " + latestID);
+        latestID++;
     }
 
-    public KafkaConnectorServer(int port, KafkaProducer<String, String> producer, ConcurrentHashMap<String, String> latestMessages) {
+    @Override
+	public void onClose(WebSocket conn, int code, String reason, boolean remote ) {
+        System.out.println("Disconnected User: " + conn.getAttachment());
+	}
+
+    public KafkaConnectorServer(int port, KafkaProducer<String, String> producer) {
         super(new InetSocketAddress(port));
         this.producer = producer;
-        this.latestMessages = latestMessages;
+        this.latestID = 0;
     }
 }

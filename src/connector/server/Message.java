@@ -5,9 +5,11 @@ import com.google.gson.Gson;
 public class Message {
     private String type;
     private Object payload;
+    private Integer userId;
 
-    Message(String type, Object payload) {
+    Message(String type, Integer userId, Object payload) {
         this.type = type;
+        this.userId = userId;
         this.payload = payload;
     }
 
@@ -27,5 +29,9 @@ public class Message {
 
     public Object getPayload() {
         return payload;
+    }
+
+    public Integer getUserId() {
+        return userId;
     }
 }

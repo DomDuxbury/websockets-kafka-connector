@@ -1,6 +1,7 @@
 package connector;
 
 import connector.server.KafkaConnectorServer;
+import connector.server.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -10,17 +11,14 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
     private static final String KAFKA_SERVER = "localhost:9092";
 
     public static void main(String[] args) throws Exception {
-        ConcurrentHashMap<String, String> latestMessages = new ConcurrentHashMap<>();
-
         // Push messages from web sockets onto Kafka
         KafkaProducer producer = createProducer();
-        KafkaConnectorServer server = new KafkaConnectorServer(8887, producer, latestMessages);
+        KafkaConnectorServer server = new KafkaConnectorServer(8887, producer);
         Thread thread = new Thread(() -> server.start());
         thread.run();
 
@@ -31,8 +29,8 @@ public class Main {
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10));
             for (ConsumerRecord<String, String> record : records) {
-                server.sendMessage(record.topic(), record.value());
-                latestMessages.put(record.topic(), record.value());
+                Message serverMessage = Message.deserialize(record.value());
+                server.sendMessage(serverMessage);
             }
         }
     }
