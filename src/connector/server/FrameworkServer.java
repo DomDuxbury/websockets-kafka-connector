@@ -17,6 +17,11 @@ public abstract class FrameworkServer extends WebSocketServer {
         broadcast(message.serialize());
     }
 
+    public void sendMessage(WebSocket socket, String type, Object payload) {
+		Message message = new Message(type, payload);
+		socket.send(message.serialize());
+	}
+
 	@Override
 	public void onOpen( WebSocket conn, ClientHandshake handshake ) {
 		System.out.println( conn.getRemoteSocketAddress().getAddress().getHostAddress() + " entered the room!" );

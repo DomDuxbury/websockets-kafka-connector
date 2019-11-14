@@ -6,6 +6,7 @@ import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,8 +19,28 @@ public class KafkaConnectorServer extends FrameworkServer {
         Message message = Message.deserialize(s);
         String topic = message.getType();
         String payload = (String) message.getPayload();
-        ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, payload);
-        producer.send(record);
+        handleMessage(webSocket, topic, payload);
+    }
+
+    private void handleMessage(WebSocket socket, String topic, String payload) {
+        switch (topic) {
+            case "mcda/websockets/AUTHENTICATION_REQUEST":
+                authenticateUser(socket, payload);
+                break;
+            default:
+                ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, payload);
+                producer.send(record);
+        }
+    }
+
+    private void authenticateUser(WebSocket websocket, String credentials) {
+        if (credentials.equals("hardy")) {
+            sendMessage(websocket, "AUTHENTICATION_SUCCESS", "");
+            websocket.setAttachment(true);
+            System.out.println("Authenticated user");
+        } else {
+            sendMessage(websocket, "AUTHENTICATION_FAILURE", "");
+        }
     }
 
     @Override

@@ -43,7 +43,7 @@ public class Main {
         props.put("bootstrap.servers", KAFKA_SERVER);
         props.put("acks", "all");
         props.put("retries", 0);
-        props.put("batch.size", 16384);
+        props.put("batch.size", 1);
         props.put("linger.ms", 0);
         props.put("buffer.memory", 33554432);
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
@@ -57,7 +57,7 @@ public class Main {
         props.setProperty("group.id", "test");
         props.setProperty("enable.auto.commit", "true");
         props.setProperty("max.poll.records", "1");
-        props.setProperty("auto.commit.interval.ms", "1000");
+        props.setProperty("auto.commit.interval.ms", "100");
         props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         return new KafkaConsumer<>(props);
