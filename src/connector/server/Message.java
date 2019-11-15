@@ -34,4 +34,13 @@ public class Message {
     public Integer getUserId() {
         return userId;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "type='" + type + '\'' +
+                ", payload=" + payload +
+                ", userId=" + userId +
+                '}';
+    }
 }

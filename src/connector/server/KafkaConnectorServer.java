@@ -7,13 +7,11 @@ import org.java_websocket.handshake.ClientHandshake;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class KafkaConnectorServer extends FrameworkServer {
 
     private KafkaProducer<String, String> producer;
-    private Integer latestID;
+    private ArrayList<WebSocket> sockets = new ArrayList<>();
 
     @Override
     public void onMessage(WebSocket webSocket, String s) {
@@ -26,7 +24,7 @@ public class KafkaConnectorServer extends FrameworkServer {
     private void handleMessage(WebSocket socket, String topic, String payload) {
         switch (topic) {
             case "mcda/websockets/AUTHENTICATION_REQUEST":
-                authenticateUser(socket, payload);
+                authenticateUser(socket.getAttachment(), payload);
                 break;
             default:
                 ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, payload);
@@ -34,25 +32,21 @@ public class KafkaConnectorServer extends FrameworkServer {
         }
     }
 
-    private void authenticateUser(WebSocket websocket, String credentials) {
+    private void authenticateUser(User user, String credentials) {
+        Message message;
+        System.out.println(user);
         if (credentials.equals("hardy")) {
-            sendMessage(websocket, "AUTHENTICATION_SUCCESS", "");
-            websocket.setAttachment(true);
+            message = new Message("AUTHENTICATION_SUCCESS", user.getId(), "");
+            user.authoriseUser();
             System.out.println("Authenticated user");
         } else {
-            sendMessage(websocket, "AUTHENTICATION_FAILURE", "");
+            message = new Message("AUTHENTICATION_FAILURE", user.getId(), "");
         }
-        String messageToBackend = new Message(topic, webSocket.getAttachment(), payload).serialize();
-        ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, messageToBackend);
-        producer.send(record);
+        System.out.println(message);
+        sendMessage(message);
     }
 
-    @Override
-    public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        conn.setAttachment(latestID);
-        System.out.println("Connected User: " + latestID);
-        latestID++;
-    }
+
 
     @Override
 	public void onClose(WebSocket conn, int code, String reason, boolean remote ) {
@@ -62,6 +56,5 @@ public class KafkaConnectorServer extends FrameworkServer {
     public KafkaConnectorServer(int port, KafkaProducer<String, String> producer) {
         super(new InetSocketAddress(port));
         this.producer = producer;
-        this.latestID = 0;
     }
 }

@@ -13,23 +13,20 @@ public abstract class FrameworkServer extends WebSocketServer {
 
     public FrameworkServer(InetSocketAddress address) {
         super(address);
+        connections = new HashMap<>();
     }
 
     public void sendMessage(Message message) {
         connections.get(message.getUserId()).send(message.serialize());
     }
 
-    public void sendMessage(WebSocket socket, String type, Object payload) {
-		Message message = new Message(type, payload);
-		socket.send(message.serialize());
-	}
-
 	@Override
-	public void onOpen( WebSocket conn, ClientHandshake handshake ) {
-		System.out.println( conn.getRemoteSocketAddress().getAddress().getHostAddress() + " entered the room!" );
-	}
-
-
+    public void onOpen(WebSocket conn, ClientHandshake handshake) {
+        User newUser = new User();
+        conn.setAttachment(newUser);
+        connections.put(newUser.getId(), conn);
+        System.out.println("Connected User: " + newUser);
+    }
 
 	@Override
 	public void onError( WebSocket conn, Exception ex ) {
