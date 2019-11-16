@@ -29,8 +29,11 @@ public class Main {
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10));
             for (ConsumerRecord<String, String> record : records) {
-                Message serverMessage = Message.deserialize(record.value());
-                server.sendMessage(serverMessage);
+                Message serverMessage = Message.deserialize(record.value(), record.topic());
+                System.out.println(serverMessage);
+                if (serverMessage.getUserId() != null) {
+                    server.sendMessage(serverMessage, true);
+                }
             }
         }
     }
@@ -56,9 +59,12 @@ public class Main {
         props.setProperty("enable.auto.commit", "true");
         props.setProperty("max.poll.records", "1");
         props.setProperty("auto.commit.interval.ms", "100");
+        props.setProperty("auto.offset.reset", "latest");
         props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        return new KafkaConsumer<>(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+        //consumer.seekToEnd(consumer.assignment());
+        return consumer;
     }
 }
 

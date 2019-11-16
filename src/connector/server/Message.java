@@ -23,6 +23,17 @@ public class Message {
         return gson.fromJson(serializedMessage, Message.class);
     }
 
+    public static Message deserialize(String serializedMessage, String type) {
+        Gson gson = new Gson();
+        Message message = gson.fromJson(serializedMessage, Message.class);
+        message.setType(type);
+        return message;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public String getType() {
         return type;
     }
