@@ -16,8 +16,12 @@ public abstract class FrameworkServer extends WebSocketServer {
         connections = new HashMap<>();
     }
 
-    public void sendMessage(Message message) {
-        connections.get(message.getUserId()).send(message.serialize());
+    public void sendMessage(Message message, boolean requiresAuth) {
+        WebSocket socket = connections.get(message.getUserId());
+        User user = socket.getAttachment();
+        if (!requiresAuth || user.isAuthorised()) {
+            socket.send(message.serialize());
+        }
     }
 
 	@Override
@@ -35,6 +39,13 @@ public abstract class FrameworkServer extends WebSocketServer {
 			// some errors like port binding failed may not be assignable to a specific websocket
 			conn.close();
 		}
+	}
+
+	@Override
+	public void onClose(WebSocket conn, int code, String reason, boolean remote ) {
+        User disconnectingUser = conn.getAttachment();
+        System.out.println("Disconnected User: " + disconnectingUser);
+        connections.remove(disconnectingUser.getId());
 	}
 
 	@Override

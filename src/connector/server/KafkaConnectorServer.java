@@ -48,10 +48,7 @@ public class KafkaConnectorServer extends FrameworkServer {
 
 
 
-    @Override
-	public void onClose(WebSocket conn, int code, String reason, boolean remote ) {
-        System.out.println("Disconnected User: " + conn.getAttachment());
-	}
+
 
     public KafkaConnectorServer(int port, KafkaProducer<String, String> producer) {
         super(new InetSocketAddress(port));
