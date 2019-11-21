@@ -30,10 +30,22 @@ public class KafkaConnectorServer extends FrameworkServer {
                     startScenario(user);
                 }
                 break;
+            case "mcda/websockets/SET_ACTIVE_ROUTE":
+                System.out.println(payload);
+                if (user.isAuthorised()) {
+                    setActiveRoute(user, payload);
+                }
+                break;
             default:
                 ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, payload);
                 producer.send(record);
         }
+    }
+
+    private void setActiveRoute(User user, String routeId) {
+        Message activeRouteRequest = new Message("activeRoute", user.getId(), routeId);
+        ProducerRecord<String, String> record = new ProducerRecord<String, String>("activeRoute", activeRouteRequest.serialize());
+        producer.send(record);
     }
 
     private void startScenario(User user) {
