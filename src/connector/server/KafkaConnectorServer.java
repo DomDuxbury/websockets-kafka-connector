@@ -1,11 +1,15 @@
 package connector.server;
 
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedHashTreeMap;
+import com.google.gson.internal.LinkedTreeMap;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 
 public class KafkaConnectorServer extends FrameworkServer {
 
@@ -15,15 +19,14 @@ public class KafkaConnectorServer extends FrameworkServer {
     public void onMessage(WebSocket webSocket, String s) {
         Message message = Message.deserialize(s);
         String topic = message.getType();
-        String payload = (String) message.getPayload();
-        handleMessage(webSocket, topic, payload);
+        handleMessage(webSocket, topic, message.getPayload());
     }
 
-    private void handleMessage(WebSocket socket, String topic, String payload) {
+    private void handleMessage(WebSocket socket, String topic, Object payload) {
         User user = socket.getAttachment();
         switch (topic) {
             case "mcda/websockets/AUTHENTICATION_REQUEST":
-                authenticateUser(user, payload);
+                authenticateUser(user, (String) payload);
                 break;
             case "mcda/websockets/SCENARIO_REQUEST":
                 if (user.isAuthorised()) {
@@ -31,13 +34,21 @@ public class KafkaConnectorServer extends FrameworkServer {
                 }
                 break;
             case "mcda/websockets/SET_ACTIVE_ROUTE":
-                System.out.println(payload);
                 if (user.isAuthorised()) {
-                    setActiveRoute(user, payload);
+                    setActiveRoute(user, (String) payload);
                 }
                 break;
+            case "mcda/ScenarioView/UPDATE_COMPARISON":
+                LinkedTreeMap<String, ArrayList> map = (LinkedTreeMap<String, ArrayList>) payload;
+                //ArrayList comparisons = map.get("comparisons");
+                //ArrayList criteria = map.get("criteria");
+                Message newComparisonMessage = new Message("COMPARISONS", user.getId(), map);
+                ProducerRecord<String, String> newComparisons = new ProducerRecord<String, String>("COMPARISONS", newComparisonMessage.serialize());
+                producer.send(newComparisons);
+                System.out.println(newComparisonMessage);
+                break;
             default:
-                ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, payload);
+                ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, (String) payload);
                 producer.send(record);
         }
     }

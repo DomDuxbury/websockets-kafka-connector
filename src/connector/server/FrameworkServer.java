@@ -17,13 +17,10 @@ public abstract class FrameworkServer extends WebSocketServer {
     }
 
     public void sendMessage(Message message, boolean requiresAuth) {
-        System.out.println(message);
         if (connections.containsKey(message.getUserId())) {
-            System.out.println("Connections contains keys");
             WebSocket socket = connections.get(message.getUserId());
             User user = socket.getAttachment();
             if (!requiresAuth || user.isAuthorised()) {
-                System.out.println("message sent");
                 socket.send(message.serialize());
             }
         }

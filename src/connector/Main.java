@@ -27,10 +27,9 @@ public class Main {
         KafkaConsumer<String, String> consumer = createConsumer();
         consumer.subscribe(topics);
         while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10));
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
             for (ConsumerRecord<String, String> record : records) {
                 Message serverMessage = Message.deserialize(record.value(), record.topic());
-                System.out.println(serverMessage);
                 if (serverMessage.getUserId() != null) {
                     server.sendMessage(serverMessage, true);
                 }
