@@ -23,7 +23,7 @@ public class Main {
         thread.run();
 
         // Take messages from topics and put them onto web sockets
-        List<String> topics = Arrays.asList("TRACKS", "ROUTES");
+        List<String> topics = Arrays.asList("TRACKS", "ROUTES", "WEIGHTS");
         KafkaConsumer<String, String> consumer = createConsumer();
         consumer.subscribe(topics);
         while (true) {

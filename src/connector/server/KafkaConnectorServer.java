@@ -40,12 +40,9 @@ public class KafkaConnectorServer extends FrameworkServer {
                 break;
             case "mcda/ScenarioView/UPDATE_COMPARISON":
                 LinkedTreeMap<String, ArrayList> map = (LinkedTreeMap<String, ArrayList>) payload;
-                //ArrayList comparisons = map.get("comparisons");
-                //ArrayList criteria = map.get("criteria");
                 Message newComparisonMessage = new Message("COMPARISONS", user.getId(), map);
                 ProducerRecord<String, String> newComparisons = new ProducerRecord<String, String>("COMPARISONS", newComparisonMessage.serialize());
                 producer.send(newComparisons);
-                System.out.println(newComparisonMessage);
                 break;
             default:
                 ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, (String) payload);
@@ -60,7 +57,7 @@ public class KafkaConnectorServer extends FrameworkServer {
     }
 
     private void startScenario(User user) {
-        Message scenarioRequest = new Message("SCENARIO_REQUEST", user.getId(), "IW18");
+        Message scenarioRequest = new Message("SCENARIO_REQUEST", user.getId(), "SDKDemo");
         ProducerRecord<String, String> record = new ProducerRecord<String, String>("SCENARIO_REQUESTS", scenarioRequest.serialize());
         producer.send(record);
     }
