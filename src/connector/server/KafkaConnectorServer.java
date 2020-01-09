@@ -1,19 +1,18 @@
 package connector.server;
 
-import com.google.gson.Gson;
-import com.google.gson.internal.LinkedHashTreeMap;
 import com.google.gson.internal.LinkedTreeMap;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.java_websocket.WebSocket;
-import org.java_websocket.handshake.ClientHandshake;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class KafkaConnectorServer extends FrameworkServer {
 
     private KafkaProducer<String, String> producer;
+    private String[] scenarioNames = { "IW18", "SDKDemo" };
 
     @Override
     public void onMessage(WebSocket webSocket, String s) {
@@ -57,7 +56,8 @@ public class KafkaConnectorServer extends FrameworkServer {
     }
 
     private void startScenario(User user) {
-        Message scenarioRequest = new Message("SCENARIO_REQUEST", user.getId(), "SDKDemo");
+        String scenario = scenarioNames[new Random().nextInt(scenarioNames.length)];
+        Message scenarioRequest = new Message("SCENARIO_REQUEST", user.getId(), scenario);
         ProducerRecord<String, String> record = new ProducerRecord<String, String>("SCENARIO_REQUESTS", scenarioRequest.serialize());
         producer.send(record);
     }
