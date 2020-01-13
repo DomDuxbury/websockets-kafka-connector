@@ -7,9 +7,9 @@ public class Message {
     private Object payload;
     private Integer userId;
 
-    Message(String type, Integer userId, Object payload) {
+    Message(String type, Integer id, Object payload) {
         this.type = type;
-        this.userId = userId;
+        this.userId = id;
         this.payload = payload;
     }
 

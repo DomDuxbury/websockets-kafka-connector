@@ -31,7 +31,7 @@ public class Main {
             for (ConsumerRecord<String, String> record : records) {
                 Message serverMessage = Message.deserialize(record.value(), record.topic());
                 if (serverMessage.getUserId() != null) {
-                    server.sendMessage(serverMessage, true);
+                    server.sendFrontendMessage(serverMessage, true);
                 }
             }
         }

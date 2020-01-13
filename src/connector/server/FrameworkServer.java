@@ -9,16 +9,16 @@ import java.util.HashMap;
 
 public abstract class FrameworkServer extends WebSocketServer {
 
-	private HashMap<Integer, WebSocket> connections;
+	private HashMap<Integer, WebSocket> connectedUsers;
 
     public FrameworkServer(InetSocketAddress address) {
         super(address);
-        connections = new HashMap<>();
+        connectedUsers = new HashMap<>();
     }
 
-    public void sendMessage(Message message, boolean requiresAuth) {
-        if (connections.containsKey(message.getUserId())) {
-            WebSocket socket = connections.get(message.getUserId());
+    public void sendFrontendMessage(Message message, boolean requiresAuth) {
+        if (connectedUsers.containsKey(message.getUserId())) {
+            WebSocket socket = connectedUsers.get(message.getUserId());
             User user = socket.getAttachment();
             if (!requiresAuth || user.isAuthorised()) {
                 socket.send(message.serialize());
@@ -26,12 +26,23 @@ public abstract class FrameworkServer extends WebSocketServer {
         }
     }
 
+    public void sendFrontendMessage(Message message, WebSocket socket, boolean requiresAuth) {
+        User user = socket.getAttachment();
+        if (!requiresAuth || user.isAuthorised()) {
+            socket.send(message.serialize());
+        }
+    }
+
 	@Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         User newUser = new User();
         conn.setAttachment(newUser);
-        connections.put(newUser.getId(), conn);
         System.out.println("Connected User: " + newUser);
+    }
+
+    public void connectUser(WebSocket conn, User newUser) {
+        System.out.println(newUser.getInfo().getUserId());
+        connectedUsers.put(newUser.getInfo().getUserId(), conn);
     }
 
 	@Override
@@ -47,7 +58,9 @@ public abstract class FrameworkServer extends WebSocketServer {
 	public void onClose(WebSocket conn, int code, String reason, boolean remote ) {
         User disconnectingUser = conn.getAttachment();
         System.out.println("Disconnected User: " + disconnectingUser);
-        connections.remove(disconnectingUser.getId());
+        if (disconnectingUser.isAuthorised()) {
+            connectedUsers.remove(disconnectingUser.getInfo().getUserId());
+        }
 	}
 
 	@Override
