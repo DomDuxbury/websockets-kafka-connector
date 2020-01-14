@@ -73,7 +73,7 @@ public class KafkaConnectorServer extends FrameworkServer {
             // Connect the user so they can receive messages from the backend
             connectUser(socket, user);
 
-            message = new Message("AUTHENTICATION_SUCCESS", user.getConnectionId(), 0,"");
+            message = new Message("AUTHENTICATION_SUCCESS", user.getConnectionId(), 0, user);
         } else {
             message = new Message("AUTHENTICATION_FAILURE", user.getConnectionId(), 0,"");
         }

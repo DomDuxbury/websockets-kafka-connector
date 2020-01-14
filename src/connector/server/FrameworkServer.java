@@ -41,7 +41,6 @@ public abstract class FrameworkServer extends WebSocketServer {
     }
 
     public void connectUser(WebSocket conn, User newUser) {
-        System.out.println(newUser.getInfo().getUserId());
         connectedUsers.put(newUser.getInfo().getUserId(), conn);
     }
 

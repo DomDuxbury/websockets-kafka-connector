@@ -44,9 +44,7 @@ public class Main {
                     server.sendFrontendMessage(serverMessage, true);
                 }
                 if (record.topic().equals("TRACKS") && serverMessage.getTimeStep() % 100 == 0) {
-                    System.out.println("Recording progress");
                     LinkedTreeMap<String, Double> harbourState = (LinkedTreeMap) serverMessage.getPayload();
-                    System.out.println(harbourState.get("score"));
                     db.recordScore(serverMessage.getUserId(), serverMessage.getTimeStep(), (int) Math.round(harbourState.get("score")));
                 }
             }
