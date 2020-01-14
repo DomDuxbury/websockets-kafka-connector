@@ -1,5 +1,6 @@
 package connector;
 
+import com.google.gson.internal.LinkedTreeMap;
 import connector.server.KafkaConnectorServer;
 import connector.server.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -14,8 +15,17 @@ import java.util.Properties;
 
 public class Main {
     private static final String KAFKA_SERVER = "localhost:9092";
+    private static PostgresInterface db;
+
 
     public static void main(String[] args) throws Exception {
+        // Set up database connection
+        try {
+            db = new PostgresInterface();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // Push messages from web sockets onto Kafka
         KafkaProducer producer = createProducer();
         KafkaConnectorServer server = new KafkaConnectorServer(8887, producer);
@@ -32,6 +42,12 @@ public class Main {
                 Message serverMessage = Message.deserialize(record.value(), record.topic());
                 if (serverMessage.getUserId() != null) {
                     server.sendFrontendMessage(serverMessage, true);
+                }
+                if (record.topic().equals("TRACKS") && serverMessage.getTimeStep() % 100 == 0) {
+                    System.out.println("Recording progress");
+                    LinkedTreeMap<String, Double> harbourState = (LinkedTreeMap) serverMessage.getPayload();
+                    System.out.println(harbourState.get("score"));
+                    db.recordScore(serverMessage.getUserId(), serverMessage.getTimeStep(), (int) Math.round(harbourState.get("score")));
                 }
             }
         }

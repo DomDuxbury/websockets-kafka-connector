@@ -6,11 +6,13 @@ public class Message {
     private String type;
     private Object payload;
     private Integer userId;
+    private Integer timeStep;
 
-    Message(String type, Integer id, Object payload) {
+    Message(String type, Integer id, Integer timeStep, Object payload) {
         this.type = type;
         this.userId = id;
         this.payload = payload;
+        this.timeStep = timeStep;
     }
 
     String serialize() {
@@ -40,6 +42,10 @@ public class Message {
 
     public Object getPayload() {
         return payload;
+    }
+
+    public Integer getTimeStep() {
+        return timeStep;
     }
 
     public Integer getUserId() {

@@ -8,7 +8,6 @@ import org.java_websocket.WebSocket;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class KafkaConnectorServer extends FrameworkServer {
 
@@ -48,7 +47,7 @@ public class KafkaConnectorServer extends FrameworkServer {
     }
 
     private void sendKafkaMessage(String type, Integer userId, Object payload) {
-        Message kafkaMessage = new Message(type, userId, payload);
+        Message kafkaMessage = new Message(type, userId, 0, payload);
         ProducerRecord<String, String> record = new ProducerRecord<String, String>(type, kafkaMessage.serialize());
         producer.send(record);
     }
@@ -74,9 +73,9 @@ public class KafkaConnectorServer extends FrameworkServer {
             // Connect the user so they can receive messages from the backend
             connectUser(socket, user);
 
-            message = new Message("AUTHENTICATION_SUCCESS", user.getConnectionId(), "");
+            message = new Message("AUTHENTICATION_SUCCESS", user.getConnectionId(), 0,"");
         } else {
-            message = new Message("AUTHENTICATION_FAILURE", user.getConnectionId(), "");
+            message = new Message("AUTHENTICATION_FAILURE", user.getConnectionId(), 0,"");
         }
         sendFrontendMessage(message, socket, false);
     }

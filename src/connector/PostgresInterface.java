@@ -64,7 +64,7 @@ public class PostgresInterface {
     public void recordScore(Integer userId, Integer timeStep, Integer score) {
         try {
             PreparedStatement statement = buildRecordScoreStatement(userId, timeStep, score);
-            ResultSet resultSet = statement.executeQuery();
+            statement.executeUpdate();
         } catch (Exception e) {
             System.out.println("Recording score failed...");
             e.printStackTrace();
