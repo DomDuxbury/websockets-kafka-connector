@@ -28,7 +28,9 @@ public class KafkaConnectorServer extends FrameworkServer {
                 authenticateUser(socket, user, (String) payload);
                 break;
             case "mcda/websockets/SCENARIO_REQUEST":
+                System.out.println(user);
                 if (user.isAuthorised()) {
+                    System.out.println("starting scenario");
                     startScenario(user);
                 }
                 break;
@@ -57,7 +59,8 @@ public class KafkaConnectorServer extends FrameworkServer {
     }
 
     private void startScenario(User user) {
-        String scenario = user.getInfo().getScenarioName();
+        String scenario = user.getInfo().getFirstScenario();
+        System.out.println(scenario);
         sendKafkaMessage("SCENARIO_REQUEST", user.getInfo().getUserId(), scenario);
     }
 

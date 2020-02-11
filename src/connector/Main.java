@@ -40,10 +40,11 @@ public class Main {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
             for (ConsumerRecord<String, String> record : records) {
                 Message serverMessage = Message.deserialize(record.value(), record.topic());
+                System.out.println(serverMessage);
                 if (serverMessage.getUserId() != null) {
                     server.sendFrontendMessage(serverMessage, true);
                 }
-                if (record.topic().equals("TRACKS") && serverMessage.getTimeStep() % 100 == 0) {
+                if (record.topic().equals("TRACKS") && (serverMessage.getTimeStep() + 1) % 100 == 0) {
                     LinkedTreeMap<String, Double> harbourState = (LinkedTreeMap) serverMessage.getPayload();
                     db.recordScore(serverMessage.getUserId(), serverMessage.getTimeStep(), (int) Math.round(harbourState.get("score")));
                 }

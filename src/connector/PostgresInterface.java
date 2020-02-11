@@ -23,21 +23,23 @@ public class PostgresInterface {
         conn = DriverManager.getConnection(url, props);
     }
 
-    private PreparedStatement buildCreateUserStatement(String scenario, Boolean explanation,
-                                                       Boolean preferences, Boolean dynamicRefresh) throws Exception {
+    private PreparedStatement buildCreateUserStatement(String firstScenario, String secondScenario, String thirdScenario,
+                                                       Boolean explanation, Boolean preferences, Boolean dynamicRefresh) throws Exception {
         String createUserQuery = "INSERT INTO users " +
-                "(scenario, timestep, explanation, preferences, dynamic_refresh, scenario_score, connected) VALUES (?, 0, ?, ?, ?, 0, true)" +
+                "(scenario_1, scenario_2, scenario_3, timestep, explanation, preferences, dynamic_refresh, scenario_1_score, scenario_2_score, scenario_3_score) VALUES (?, ?, ?, 0, ?, ?, ?, 0, 0, 0)" +
                 "RETURNING user_id";
         PreparedStatement statement = conn.prepareStatement(createUserQuery);
-        statement.setString(1, scenario);
-        statement.setBoolean(2, explanation);
-        statement.setBoolean(3, preferences);
-        statement.setBoolean(4, dynamicRefresh);
+        statement.setString(1, firstScenario);
+        statement.setString(2, secondScenario);
+        statement.setString(3, thirdScenario);
+        statement.setBoolean(4, explanation);
+        statement.setBoolean(5, preferences);
+        statement.setBoolean(6, dynamicRefresh);
         return statement;
     }
 
-    private PreparedStatement buildRecordScoreStatement(Integer userId, Integer timeStep, Integer score) throws Exception {
-        String createUserQuery = "UPDATE users SET timestep = ?, scenario_score = ? WHERE user_id = ?";
+    private PreparedStatement buildRecordScoreStatement(Integer userId, Integer timeStep, Integer scenarioNumber, Integer score) throws Exception {
+        String createUserQuery = "UPDATE users SET timestep = ?, scenario_ " + scenarioNumber + "_score = ? WHERE user_id = ?";
         PreparedStatement statement = conn.prepareStatement(createUserQuery);
         statement.setInt(1, timeStep);
         statement.setInt(2, score);
@@ -46,14 +48,14 @@ public class PostgresInterface {
     }
 
     // Creates a user and returns the userId
-    public ExperimentInfo createUser(String scenario, Boolean explanation, Boolean preferences, Boolean dynamicRefresh) {
+    public ExperimentInfo createUser(String firstScenario, String secondScenario, String thirdScenario,
+                                     Boolean explanation, Boolean preferences, Boolean dynamicRefresh) {
         try {
-            PreparedStatement statement = buildCreateUserStatement(scenario, explanation, preferences, dynamicRefresh);
+            PreparedStatement statement = buildCreateUserStatement(firstScenario, secondScenario, thirdScenario, explanation, preferences, dynamicRefresh);
             ResultSet resultSet = statement.executeQuery();
             resultSet.next();
             int userId = resultSet.getInt(1);
-            System.out.println(userId);
-            return new ExperimentInfo(userId, scenario, explanation, preferences, dynamicRefresh);
+            return new ExperimentInfo(userId, firstScenario, secondScenario, thirdScenario, explanation, preferences, dynamicRefresh);
         } catch (Exception e) {
             System.out.println("Creating user failed...");
             e.printStackTrace();
@@ -63,7 +65,7 @@ public class PostgresInterface {
 
     public void recordScore(Integer userId, Integer timeStep, Integer score) {
         try {
-            PreparedStatement statement = buildRecordScoreStatement(userId, timeStep, score);
+            PreparedStatement statement = buildRecordScoreStatement(userId, timeStep,1, score);
             statement.executeUpdate();
         } catch (Exception e) {
             System.out.println("Recording score failed...");
