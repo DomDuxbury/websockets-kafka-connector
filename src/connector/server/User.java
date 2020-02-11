@@ -7,6 +7,7 @@ import java.util.Random;
 
 public class User {
     private static int latestId = 0;
+    private int stage;
     private int connectionId;
     private boolean authorised;
     private ExperimentInfo info;
@@ -19,7 +20,16 @@ public class User {
     public User() {
         this.connectionId = latestId;
         this.authorised = false;
+        this.stage = 0;
         latestId++;
+    }
+
+    public void incrementStage() {
+        stage++;
+    }
+
+    public int getStage() {
+        return stage;
     }
 
     public int getConnectionId() {

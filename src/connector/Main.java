@@ -44,9 +44,8 @@ public class Main {
                 if (serverMessage.getUserId() != null) {
                     server.sendFrontendMessage(serverMessage, true);
                 }
-                if (record.topic().equals("TRACKS") && (serverMessage.getTimeStep() + 1) % 100 == 0) {
-                    LinkedTreeMap<String, Double> harbourState = (LinkedTreeMap) serverMessage.getPayload();
-                    db.recordScore(serverMessage.getUserId(), serverMessage.getTimeStep(), (int) Math.round(harbourState.get("score")));
+                if (record.topic().equals("TRACKS") && (serverMessage.getTimeStep() + 1) == 360) {
+                    server.recordScore(db, serverMessage);
                 }
             }
         }

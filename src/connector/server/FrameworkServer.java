@@ -1,5 +1,7 @@
 package connector.server;
 
+import com.google.gson.internal.LinkedTreeMap;
+import connector.PostgresInterface;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -23,6 +25,17 @@ public abstract class FrameworkServer extends WebSocketServer {
             if (!requiresAuth || user.isAuthorised()) {
                 socket.send(message.serialize());
             }
+        }
+    }
+
+
+    public void recordScore(PostgresInterface db, Message message) {
+        LinkedTreeMap<String, Double> harbourState = (LinkedTreeMap) message.getPayload();
+        int score = (int) Math.round(harbourState.get("score"));
+        WebSocket socket = connectedUsers.get(message.getUserId());
+        if (socket != null) {
+            User user = socket.getAttachment();
+            db.recordScore(message.getUserId(), message.getTimeStep(), user.getStage(), score);
         }
     }
 
@@ -58,7 +71,7 @@ public abstract class FrameworkServer extends WebSocketServer {
         User disconnectingUser = conn.getAttachment();
         System.out.println("Disconnected User: " + disconnectingUser);
         if (disconnectingUser.isAuthorised()) {
-            connectedUsers.remove(disconnectingUser.getInfo().getUserId());
+            //connectedUsers.remove(disconnectingUser.getInfo().getUserId());
         }
 	}
 

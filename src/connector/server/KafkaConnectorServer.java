@@ -59,9 +59,16 @@ public class KafkaConnectorServer extends FrameworkServer {
     }
 
     private void startScenario(User user) {
-        String scenario = user.getInfo().getFirstScenario();
-        System.out.println(scenario);
-        sendKafkaMessage("SCENARIO_REQUEST", user.getInfo().getUserId(), scenario);
+        user.incrementStage();
+        String scenario = switch(user.getStage()) {
+            case 1 -> user.getInfo().getFirstScenario();
+            case 2 -> user.getInfo().getSecondScenario();
+            case 3 -> user.getInfo().getThirdScenario();
+            default -> "";
+        };
+        if (!scenario.equals("")) {
+            sendKafkaMessage("SCENARIO_REQUEST", user.getInfo().getUserId(), scenario);
+        }
     }
 
     private void authenticateUser(WebSocket socket, User user, String credentials) {

@@ -39,7 +39,8 @@ public class PostgresInterface {
     }
 
     private PreparedStatement buildRecordScoreStatement(Integer userId, Integer timeStep, Integer scenarioNumber, Integer score) throws Exception {
-        String createUserQuery = "UPDATE users SET timestep = ?, scenario_ " + scenarioNumber + "_score = ? WHERE user_id = ?";
+        String createUserQuery = "UPDATE users SET timestep = ?, scenario_" + scenarioNumber + "_score = ? WHERE user_id = ?";
+        System.out.println(createUserQuery);
         PreparedStatement statement = conn.prepareStatement(createUserQuery);
         statement.setInt(1, timeStep);
         statement.setInt(2, score);
@@ -63,9 +64,9 @@ public class PostgresInterface {
         }
     }
 
-    public void recordScore(Integer userId, Integer timeStep, Integer score) {
+    public void recordScore(Integer userId, Integer timeStep, Integer scenarioNumber, Integer score) {
         try {
-            PreparedStatement statement = buildRecordScoreStatement(userId, timeStep,1, score);
+            PreparedStatement statement = buildRecordScoreStatement(userId, timeStep,scenarioNumber, score);
             statement.executeUpdate();
         } catch (Exception e) {
             System.out.println("Recording score failed...");
