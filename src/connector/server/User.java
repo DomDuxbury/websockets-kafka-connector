@@ -3,6 +3,7 @@ package connector.server;
 import connector.PostgresInterface;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class User {
@@ -12,9 +13,9 @@ public class User {
     private boolean authorised;
     private ExperimentInfo info;
     private String[] scenarioNames = {
-            "harbourTest",
-            "harbourTest",
-            "harbourTest",
+            "scenario_one",
+            "scenario_one",
+            "scenario_one",
     };
 
     public User() {
@@ -63,15 +64,15 @@ public class User {
         boolean dynamic_refresh = new Random().nextBoolean();
         boolean explanation = new Random().nextBoolean();
         this.info = db.createUser(firstScenario, secondScenario, thirdScenario, preferences, dynamic_refresh, explanation);
-        System.out.println(info);
-        System.out.println(getInfo());
     }
 
     @Override
     public String toString() {
         return "User{" +
-                "id=" + connectionId +
+                "stage=" + stage +
+                ", connectionId=" + connectionId +
                 ", authorised=" + authorised +
+                ", info=" + info +
                 '}';
     }
 }
