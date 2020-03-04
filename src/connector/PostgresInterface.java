@@ -15,6 +15,7 @@ public class PostgresInterface {
     private String user = "postgres";
     private String password = "mcdaUser";
     private String url = "jdbc:postgresql://localhost:5432/postgres";
+    private String prodUrl = "jdbc:postgresql://35.246.0.142:5432/postgres";
 
     public PostgresInterface() throws Exception {
         Properties props = new Properties();

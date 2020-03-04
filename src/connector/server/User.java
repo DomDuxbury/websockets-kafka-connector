@@ -57,9 +57,9 @@ public class User {
     }
 
     public void createExperimentInfo(PostgresInterface db) {
-        String firstScenario = getScenario();
-        String secondScenario = getScenario();
-        String thirdScenario = getScenario();
+        String firstScenario = scenarioNames[0];
+        String secondScenario = scenarioNames[1];
+        String thirdScenario = scenarioNames[2];
         boolean preferences = new Random().nextBoolean();
         boolean dynamic_refresh = new Random().nextBoolean();
         boolean explanation = new Random().nextBoolean();

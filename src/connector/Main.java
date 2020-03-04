@@ -15,6 +15,10 @@ import java.util.Properties;
 
 public class Main {
     private static final String KAFKA_SERVER = "localhost:9092";
+    private static final String PROD_KAFKA_SERVER = "35.197.214.134:9092";
+    private static final String SERVER_ADDRESS = KAFKA_SERVER;
+
+
     private static PostgresInterface db;
 
 
@@ -30,7 +34,7 @@ public class Main {
         KafkaProducer producer = createProducer();
         KafkaConnectorServer server = new KafkaConnectorServer(8887, producer);
         Thread thread = new Thread(() -> server.start());
-        thread.run();
+        thread.start();
 
         // Take messages from topics and put them onto web sockets
         List<String> topics = Arrays.asList("TRACKS", "ROUTES", "WEIGHTS");
@@ -43,7 +47,7 @@ public class Main {
                 if (serverMessage.getUserId() != null) {
                     server.sendFrontendMessage(serverMessage, true);
                 }
-                if (record.topic().equals("TRACKS") && (serverMessage.getTimeStep() + 1) == 300) {
+                if (record.topic().equals("TRACKS") && (serverMessage.getTimeStep() + 1) % 300 == 0) {
                     System.out.println("Recording score!");
                     server.recordScore(db, serverMessage);
                 }
@@ -54,7 +58,7 @@ public class Main {
 
     private static KafkaProducer<String, String> createProducer() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", KAFKA_SERVER);
+        props.put("bootstrap.servers", SERVER_ADDRESS);
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("batch.size", 1);
@@ -67,8 +71,8 @@ public class Main {
 
     private static KafkaConsumer<String, String> createConsumer() {
         Properties props = new Properties();
-        props.setProperty("bootstrap.servers", KAFKA_SERVER);
-        props.setProperty("group.id", "test");
+        props.setProperty("bootstrap.servers", SERVER_ADDRESS);
+        props.setProperty("group.id", "frontend-consumer");
         props.setProperty("enable.auto.commit", "true");
         props.setProperty("max.poll.records", "1");
         props.setProperty("auto.commit.interval.ms", "100");
@@ -76,7 +80,7 @@ public class Main {
         props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        //consumer.seekToEnd(consumer.assignment());
+        consumer.seekToEnd(consumer.assignment());
         return consumer;
     }
 }

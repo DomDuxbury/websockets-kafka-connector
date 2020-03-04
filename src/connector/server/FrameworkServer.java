@@ -22,7 +22,7 @@ public abstract class FrameworkServer extends WebSocketServer {
         if (connectedUsers.containsKey(message.getUserId())) {
             WebSocket socket = connectedUsers.get(message.getUserId());
             User user = socket.getAttachment();
-            if (!requiresAuth || user.isAuthorised()) {
+            if (!requiresAuth || user.isAuthorised() && socket.isOpen()) {
                 socket.send(message.serialize());
             }
         }
@@ -35,6 +35,7 @@ public abstract class FrameworkServer extends WebSocketServer {
         WebSocket socket = connectedUsers.get(message.getUserId());
         if (socket != null) {
             User user = socket.getAttachment();
+            System.out.println(user.getStage());
             db.recordScore(message.getUserId(), message.getTimeStep(), user.getStage(), score);
         }
     }

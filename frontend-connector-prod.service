@@ -1,0 +1,12 @@
+[Unit]
+Description=Manage Frontend Kafka Connector service
+
+[Service]
+WorkingDirectory=/home/dominic_duxbury/
+ExecStart=/usr/lib/jvm/java-13-oracle/bin/java --enable-preview -jar /home/dominic_duxbury/kafka-frontend-connector.jar
+User=dominic_duxbury
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

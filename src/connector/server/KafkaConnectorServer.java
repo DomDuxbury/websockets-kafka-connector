@@ -66,6 +66,8 @@ public class KafkaConnectorServer extends FrameworkServer {
             case 3 -> user.getInfo().getThirdScenario();
             default -> "";
         };
+        System.out.println(user.getStage());
+        System.out.println(user.getInfo().getThirdScenario());
         if (!scenario.equals("")) {
             sendKafkaMessage("SCENARIO_REQUEST", user.getInfo().getUserId(), scenario);
         }
