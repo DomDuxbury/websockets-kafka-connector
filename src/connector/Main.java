@@ -1,6 +1,5 @@
 package connector;
 
-import com.google.gson.internal.LinkedTreeMap;
 import connector.server.KafkaConnectorServer;
 import connector.server.Message;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -30,10 +29,11 @@ public class Main {
             e.printStackTrace();
         }
 
+        int maxConcurrentSessions = 2;
         // Push messages from web sockets onto Kafka
-        KafkaProducer producer = createProducer();
-        KafkaConnectorServer server = new KafkaConnectorServer(8887, producer);
-        Thread thread = new Thread(() -> server.start());
+        KafkaProducer<String, String> producer = createProducer();
+        KafkaConnectorServer server = new KafkaConnectorServer(8887, producer, maxConcurrentSessions);
+        Thread thread = new Thread(server::start);
         thread.start();
 
         // Take messages from topics and put them onto web sockets
@@ -44,13 +44,7 @@ public class Main {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
             for (ConsumerRecord<String, String> record : records) {
                 Message serverMessage = Message.deserialize(record.value(), record.topic());
-                if (serverMessage.getUserId() != null) {
-                    server.sendFrontendMessage(serverMessage, true);
-                }
-                if (record.topic().equals("TRACKS") && (serverMessage.getTimeStep() + 1) % 300 == 0) {
-                    System.out.println("Recording score!");
-                    server.recordScore(db, serverMessage);
-                }
+                server.handleFrontendMessage(db, serverMessage, record.topic());
             }
         }
     }

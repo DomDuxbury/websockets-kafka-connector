@@ -41,7 +41,6 @@ public class PostgresInterface {
 
     private PreparedStatement buildRecordScoreStatement(Integer userId, Integer timeStep, Integer scenarioNumber, Integer score) throws Exception {
         String createUserQuery = "UPDATE users SET timestep = ?, scenario_" + scenarioNumber + "_score = ? WHERE user_id = ?";
-        System.out.println(createUserQuery);
         PreparedStatement statement = conn.prepareStatement(createUserQuery);
         statement.setInt(1, timeStep);
         statement.setInt(2, score);

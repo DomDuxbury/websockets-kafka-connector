@@ -32,6 +32,10 @@ public class Message {
         return message;
     }
 
+    public boolean isFinalTimeStep() {
+        return (timeStep + 1) % 300 == 0;
+    }
+
     public void setType(String type) {
         this.type = type;
     }

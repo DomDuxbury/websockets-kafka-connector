@@ -3,34 +3,23 @@ package connector.server;
 import connector.PostgresInterface;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.Arrays;
 import java.util.Random;
 
 public class User {
     private static int latestId = 0;
-    private int stage;
     private int connectionId;
     private boolean authorised;
     private ExperimentInfo info;
     private String[] scenarioNames = {
-            "scenario_one",
-            "scenario_one",
-            "scenario_one",
+            "introduction_scenario",
+            "introduction_scenario",
+            "introduction_scenario",
     };
 
     public User() {
         this.connectionId = latestId;
         this.authorised = false;
-        this.stage = 0;
         latestId++;
-    }
-
-    public void incrementStage() {
-        stage++;
-    }
-
-    public int getStage() {
-        return stage;
     }
 
     public int getConnectionId() {
@@ -69,7 +58,6 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "stage=" + stage +
                 ", connectionId=" + connectionId +
                 ", authorised=" + authorised +
                 ", info=" + info +

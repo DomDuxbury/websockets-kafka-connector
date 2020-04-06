@@ -7,14 +7,22 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class FrameworkServer extends WebSocketServer {
 
 	private HashMap<Integer, WebSocket> connectedUsers;
+    private HashMap<Integer, Session> sessions;
+    private int maxConcurrentSessions;
 
-    public FrameworkServer(InetSocketAddress address) {
+    public FrameworkServer(InetSocketAddress address, int maxConcurrentSessions) {
         super(address);
+        this.maxConcurrentSessions = maxConcurrentSessions;
+        this.sessions = new HashMap<>();
         connectedUsers = new HashMap<>();
     }
 
@@ -28,17 +36,11 @@ public abstract class FrameworkServer extends WebSocketServer {
         }
     }
 
-
-    public void recordScore(PostgresInterface db, Message message) {
-        LinkedTreeMap<String, Double> harbourState = (LinkedTreeMap) message.getPayload();
-        int score = (int) Math.round(harbourState.get("score"));
-        WebSocket socket = connectedUsers.get(message.getUserId());
-        if (socket != null) {
-            User user = socket.getAttachment();
-            System.out.println(user.getStage());
-            db.recordScore(message.getUserId(), message.getTimeStep(), user.getStage(), score);
-        }
+    protected Session getUserSession(Integer userId) {
+        return sessions.get(userId);
     }
+
+
 
     public void sendFrontendMessage(Message message, WebSocket socket, boolean requiresAuth) {
         User user = socket.getAttachment();
@@ -58,6 +60,28 @@ public abstract class FrameworkServer extends WebSocketServer {
         connectedUsers.put(newUser.getInfo().getUserId(), conn);
     }
 
+    protected boolean isSessionSpaceAvailable() {
+        return this.sessions.size() < maxConcurrentSessions;
+    }
+
+    protected int getTimeUntilSessionSpot() {
+        List<Integer> timeRemainingForEachSession = this.sessions.values()
+                     .stream()
+                     .map(Session::getSessionTimeRemaining)
+                     .collect(Collectors.toList());
+        return Collections.min(timeRemainingForEachSession);
+    }
+
+    protected Session startSession(User user) {
+        Session newSession = new Session(user);
+        sessions.put(user.getInfo().getUserId(), newSession);
+        return newSession;
+    }
+
+    protected void closeSession(Integer userId) {
+        sessions.remove(userId);
+    }
+
 	@Override
 	public void onError( WebSocket conn, Exception ex ) {
 		ex.printStackTrace();
@@ -73,6 +97,7 @@ public abstract class FrameworkServer extends WebSocketServer {
         System.out.println("Disconnected User: " + disconnectingUser);
         if (disconnectingUser.isAuthorised()) {
             //connectedUsers.remove(disconnectingUser.getInfo().getUserId());
+            closeSession(disconnectingUser.getInfo().getUserId());
         }
 	}
 

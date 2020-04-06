@@ -28,12 +28,16 @@ public class KafkaConnectorServer extends FrameworkServer {
                 authenticateUser(socket, user, (String) payload);
                 break;
             case "mcda/websockets/SCENARIO_REQUEST":
-                System.out.println(user);
-                if (user.isAuthorised()) {
-                    System.out.println("starting scenario");
-                    startScenario(user);
+                if (user.isAuthorised() && isSessionSpaceAvailable()) {
+                    //startScenario(user);
                 }
                 break;
+            case "mcda/websockets/START_SESSION":
+                if (user.isAuthorised() && isSessionSpaceAvailable()) {
+                    System.out.println("Starting session");
+                    Session session = startSession(user);
+                    startScenario(session);
+                }
             case "mcda/websockets/SET_ACTIVE_ROUTE":
                 if (user.isAuthorised()) {
                     setActiveRoute(user, (String) payload);
@@ -58,16 +62,42 @@ public class KafkaConnectorServer extends FrameworkServer {
         sendKafkaMessage("activeRoute", user.getInfo().getUserId(), routeId);
     }
 
-    private void startScenario(User user) {
-        user.incrementStage();
-        String scenario = switch(user.getStage()) {
+    public void handleFrontendMessage(PostgresInterface db, Message message, String topic) {
+        if (message.getUserId() != null) {
+            sendFrontendMessage(message, true);
+        }
+
+        if (topic.equals("TRACKS")) {
+            Session currentSession = getUserSession(message.getUserId());
+
+            if (currentSession != null) {
+
+                currentSession.updateTimeStep(message);
+
+                // If its the final time step record scores
+                if (message.isFinalTimeStep()) {
+                    currentSession.recordScore(message, db);
+                    if (!currentSession.isFinalStage()) {
+                        // If its not the final stage then start a scenario
+                        startScenario(currentSession);
+                    } else {
+                        // Else (final of both) then close the session
+                        closeSession(message.getUserId());
+                    }
+                }
+            }
+        }
+    }
+
+    public void startScenario(Session session) {
+        session.nextStage();
+        User user = session.getSessionUser();
+        String scenario = switch(session.getStage()) {
             case 1 -> user.getInfo().getFirstScenario();
             case 2 -> user.getInfo().getSecondScenario();
             case 3 -> user.getInfo().getThirdScenario();
             default -> "";
         };
-        System.out.println(user.getStage());
-        System.out.println(user.getInfo().getThirdScenario());
         if (!scenario.equals("")) {
             sendKafkaMessage("SCENARIO_REQUEST", user.getInfo().getUserId(), scenario);
         }
@@ -92,8 +122,8 @@ public class KafkaConnectorServer extends FrameworkServer {
         sendFrontendMessage(message, socket, false);
     }
 
-    public KafkaConnectorServer(int port, KafkaProducer<String, String> producer) {
-        super(new InetSocketAddress(port));
+    public KafkaConnectorServer(int port, KafkaProducer<String, String> producer, int maxConcurrentSessions) {
+        super(new InetSocketAddress(port), maxConcurrentSessions);
         this.producer = producer;
         try {
             this.db = new PostgresInterface();
