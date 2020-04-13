@@ -27,11 +27,6 @@ public class KafkaConnectorServer extends FrameworkServer {
             case "mcda/websockets/AUTHENTICATION_REQUEST":
                 authenticateUser(socket, user, (String) payload);
                 break;
-            case "mcda/websockets/SCENARIO_REQUEST":
-                if (user.isAuthorised() && isSessionSpaceAvailable()) {
-                    //startScenario(user);
-                }
-                break;
             case "mcda/websockets/START_SESSION":
                 if (user.isAuthorised() && isSessionSpaceAvailable()) {
                     System.out.println("Starting session");
@@ -122,13 +117,14 @@ public class KafkaConnectorServer extends FrameworkServer {
         sendFrontendMessage(message, socket, false);
     }
 
-    public KafkaConnectorServer(int port, KafkaProducer<String, String> producer, int maxConcurrentSessions) {
+    public KafkaConnectorServer(int port, KafkaProducer<String, String> producer, PostgresInterface db, int maxConcurrentSessions) {
         super(new InetSocketAddress(port), maxConcurrentSessions);
         this.producer = producer;
-        try {
-            this.db = new PostgresInterface();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.db = db;
+        //try {
+        //    this.db = new PostgresInterface();
+        //} catch (Exception e) {
+        //    e.printStackTrace();
+        //}
     }
 }
