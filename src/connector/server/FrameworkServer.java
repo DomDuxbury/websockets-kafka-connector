@@ -1,13 +1,10 @@
 package connector.server;
 
-import com.google.gson.internal.LinkedTreeMap;
-import connector.PostgresInterface;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,8 +36,6 @@ public abstract class FrameworkServer extends WebSocketServer {
     protected Session getUserSession(Integer userId) {
         return sessions.get(userId);
     }
-
-
 
     public void sendFrontendMessage(Message message, WebSocket socket, boolean requiresAuth) {
         User user = socket.getAttachment();
@@ -97,7 +92,9 @@ public abstract class FrameworkServer extends WebSocketServer {
         System.out.println("Disconnected User: " + disconnectingUser);
         if (disconnectingUser.isAuthorised()) {
             //connectedUsers.remove(disconnectingUser.getInfo().getUserId());
-            closeSession(disconnectingUser.getInfo().getUserId());
+            if (disconnectingUser.getInfo() != null) {
+                closeSession(disconnectingUser.getInfo().getUserId());
+            }
         }
 	}
 

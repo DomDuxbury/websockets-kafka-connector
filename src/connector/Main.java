@@ -19,6 +19,9 @@ public class Main {
 
         // Get the current environment and corresponding end points
         String env = getEnv();
+
+        System.out.println("Current environment set to : " + env);
+
         String kafkaURL = getKafkaURL(env);
         String postgresURL = getPostgresURL(env);
 
@@ -63,7 +66,7 @@ public class Main {
 
     public static String getKafkaURL(String env) {
         String devKafkaURL = "localhost:9092";
-        String prodKafkaURL = "35.197.214.134:9092";
+        String prodKafkaURL = "35.230.144.141:9092";
 
         if (env.equals("DEV")) {
             return devKafkaURL;

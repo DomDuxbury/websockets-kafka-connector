@@ -7,13 +7,15 @@ import java.util.Random;
 
 public class User {
     private static int latestId = 0;
-    private int connectionId;
+    private final int connectionId;
     private boolean authorised;
+    private boolean sessionStarted;
     private ExperimentInfo info;
+
     private String[] scenarioNames = {
             "introduction_scenario",
-            "introduction_scenario",
-            "introduction_scenario",
+            "porth_neigwl",
+            "intermediate_scenario",
     };
 
     public User() {
@@ -36,6 +38,14 @@ public class User {
 
     public void authoriseUser() {
         authorised = true;
+    }
+
+    public boolean sessionStarted() {
+        return sessionStarted;
+    }
+
+    public void setSessionStarted() {
+        sessionStarted = true;
     }
 
     private String getScenario() {
