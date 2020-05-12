@@ -28,15 +28,10 @@ public class Session {
         return stage == 3;
     }
 
-    public void updateTimeStep(Message message) {
-        timeStep = message.getTimeStep();
-    }
-
     public void recordScore(Message message, PostgresInterface db) {
         LinkedTreeMap<String, Double> harbourState = (LinkedTreeMap) message.getPayload();
         int score = (int) Math.round(harbourState.get("score"));
-        db.recordScore(sessionUser.getInfo().getUserId(),
-                timeStep, stage, score);
+        db.recordScore(sessionUser.getInfo().getUserId(), stage, score);
     }
 
     public User getSessionUser() {

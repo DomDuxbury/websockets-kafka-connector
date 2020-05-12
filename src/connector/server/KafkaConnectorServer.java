@@ -25,10 +25,11 @@ public class KafkaConnectorServer extends FrameworkServer {
         User user = socket.getAttachment();
         switch (topic) {
             case "mcda/websockets/AUTHENTICATION_REQUEST":
-                authenticateUser(socket, user, (String) payload);
+                LinkedTreeMap<String, String> credentials = (LinkedTreeMap<String, String>) payload;
+                authenticateUser(socket, user, credentials);
                 break;
             case "mcda/websockets/START_SESSION":
-                if (user.isAuthorised() && !user.sessionStarted() && isSessionSpaceAvailable()) {
+                if (user.isAuthorised() && !user.sessionStarted()) {
                     System.out.println("Starting session");
                     user.setSessionStarted();
                     Session session = startSession(user);
@@ -68,8 +69,6 @@ public class KafkaConnectorServer extends FrameworkServer {
 
             if (currentSession != null) {
 
-                currentSession.updateTimeStep(message);
-
                 // If its the final time step record scores
                 if (message.isFinalTimeStep()) {
                     currentSession.recordScore(message, db);
@@ -99,14 +98,17 @@ public class KafkaConnectorServer extends FrameworkServer {
         }
     }
 
-    private void authenticateUser(WebSocket socket, User user, String credentials) {
+    private void authenticateUser(WebSocket socket, User user, LinkedTreeMap<String, String> credentials) {
         Message message;
-        if (credentials.equals("hardy")) {
+        String password = credentials.get("password");
+        String workerID = credentials.get("workerID");
+
+        if (password.equals("experimentUser")) {
             // Authorise the user
             user.authoriseUser();
 
             // Add the user to the experiment
-            user.createExperimentInfo(db);
+            user.createExperimentInfo(db, workerID);
 
             // Connect the user so they can receive messages from the backend
             connectUser(socket, user);

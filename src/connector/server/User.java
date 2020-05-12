@@ -11,6 +11,7 @@ public class User {
     private boolean authorised;
     private boolean sessionStarted;
     private ExperimentInfo info;
+    private String mTurkWorkerId;
 
     private String[] scenarioNames = {
             "introduction_scenario",
@@ -55,14 +56,14 @@ public class User {
             return scenario;
     }
 
-    public void createExperimentInfo(PostgresInterface db) {
+    public void createExperimentInfo(PostgresInterface db, String mTurkWorkerId) {
         String firstScenario = scenarioNames[0];
         String secondScenario = scenarioNames[1];
         String thirdScenario = scenarioNames[2];
         boolean preferences = new Random().nextBoolean();
         boolean dynamic_refresh = new Random().nextBoolean();
         boolean explanation = new Random().nextBoolean();
-        this.info = db.createUser(firstScenario, secondScenario, thirdScenario, preferences, dynamic_refresh, explanation);
+        this.info = db.createUser(mTurkWorkerId, firstScenario, secondScenario, thirdScenario, preferences, dynamic_refresh, explanation);
     }
 
     @Override
