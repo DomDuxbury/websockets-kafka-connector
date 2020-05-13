@@ -11,8 +11,8 @@ import java.util.ArrayList;
 
 public class KafkaConnectorServer extends FrameworkServer {
 
-    private KafkaProducer<String, String> producer;
-    private PostgresInterface db;
+    private final KafkaProducer<String, String> producer;
+    private final PostgresInterface db;
 
     @Override
     public void onMessage(WebSocket webSocket, String s) {
@@ -35,6 +35,7 @@ public class KafkaConnectorServer extends FrameworkServer {
                     Session session = startSession(user);
                     startScenario(session);
                 }
+                break;
             case "mcda/websockets/SET_ACTIVE_ROUTE":
                 if (user.isAuthorised()) {
                     setActiveRoute(user, (String) payload);
