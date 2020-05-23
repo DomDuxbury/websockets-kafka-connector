@@ -4,9 +4,10 @@ import com.google.gson.Gson;
 
 public class Message {
     private String type;
-    private Object payload;
-    private Integer userId;
-    private Integer timeStep;
+    private final Object payload;
+    private final Integer userId;
+    private final Integer timeStep;
+    private final int MAX_TIME_STEPS = 300;
 
     Message(String type, Integer id, Integer timeStep, Object payload) {
         this.type = type;
@@ -33,7 +34,7 @@ public class Message {
     }
 
     public boolean isFinalTimeStep() {
-        return (timeStep + 1) % 300 == 0;
+        return (timeStep + 1) % MAX_TIME_STEPS == 0;
     }
 
     public void setType(String type) {

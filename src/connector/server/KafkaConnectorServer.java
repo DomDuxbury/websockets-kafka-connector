@@ -7,7 +7,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.java_websocket.WebSocket;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 
 public class KafkaConnectorServer extends FrameworkServer {
 
@@ -38,12 +37,13 @@ public class KafkaConnectorServer extends FrameworkServer {
                 break;
             case "mcda/websockets/SET_ACTIVE_ROUTE":
                 if (user.isAuthorised()) {
-                    setActiveRoute(user, (String) payload);
+                    LinkedTreeMap<String, String> activeRoute = (LinkedTreeMap<String, String>) payload;
+                    user.recordActivatedRoute(activeRoute.get("type"));
+                    setActiveRoute(user, activeRoute.get("sol"));
                 }
                 break;
             case "mcda/ScenarioView/UPDATE_COMPARISON":
-                LinkedTreeMap<String, ArrayList> map = (LinkedTreeMap<String, ArrayList>) payload;
-                sendKafkaMessage("COMPARISONS", user.getInfo().getUserId(), map);
+                sendKafkaMessage("COMPARISONS", user.getInfo().getUserId(), payload);
                 break;
             default:
                 break;

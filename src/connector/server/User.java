@@ -12,6 +12,9 @@ public class User {
     private boolean sessionStarted;
     private ExperimentInfo info;
     private String mTurkWorkerId;
+    private int numberOfRecommendedRoutesTaken = 0;
+    private int numberOfDrawnRoutesTaken = 0;
+    private int numberOfRoutesDeactivated = 0;
 
     private String[] scenarioNames = {
             "introduction_scenario",
@@ -49,11 +52,34 @@ public class User {
         sessionStarted = true;
     }
 
+    public void recordActivatedRoute(String type) {
+        if (type.equals("RECOMMENDED")) {
+            numberOfRecommendedRoutesTaken++;
+        } else if (type.equals("DRAWN")) {
+            numberOfDrawnRoutesTaken++;
+        } else if (type.equals("DEACTIVATED")) {
+            numberOfRoutesDeactivated++;
+        }
+    }
+
+    public int getNumberOfRecommendedRoutesTaken() {
+        return numberOfRecommendedRoutesTaken;
+    }
+
+    public int getNumberOfDrawnRoutesTaken() {
+        return numberOfDrawnRoutesTaken;
+    }
+
+    public void resetRoutesTaken() {
+        numberOfRecommendedRoutesTaken = 0;
+        numberOfDrawnRoutesTaken = 0;
+    }
+
     private String getScenario() {
-            int index = new Random().nextInt(scenarioNames.length);
-            String scenario = scenarioNames[index];
-            scenarioNames = ArrayUtils.remove(scenarioNames, index);
-            return scenario;
+        int index = new Random().nextInt(scenarioNames.length);
+        String scenario = scenarioNames[index];
+        scenarioNames = ArrayUtils.remove(scenarioNames, index);
+        return scenario;
     }
 
     public void createExperimentInfo(PostgresInterface db, String mTurkWorkerId) {
@@ -69,9 +95,11 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                ", connectionId=" + connectionId +
+                "connectionId=" + connectionId +
                 ", authorised=" + authorised +
+                ", sessionStarted=" + sessionStarted +
                 ", info=" + info +
+                ", mTurkWorkerId='" + mTurkWorkerId + '\'' +
                 '}';
     }
 }
